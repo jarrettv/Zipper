@@ -17,6 +17,7 @@ TestResults
 [Dd]ebug/
 [Rr]elease/
 x64/
+*.nupkg
 *_i.c
 *_p.c
 *.ilk

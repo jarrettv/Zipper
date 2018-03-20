@@ -13,50 +13,93 @@ namespace IllumiCare.Platform.CommandLineUtils
         {
             var app = new CommandLineApplication(throwOnUnexpectedArg: true);
 
-            var outputFile = app.Option("-o | --outputFile <zipFile>", "The file to output (required).", CommandOptionType.SingleValue);
-            var inputPath = app.Option("-i | --inputPath <folder>", "The path to the application folder to be zipped (optional). If not supplied, the current folder is used.", CommandOptionType.SingleValue);
+            app.Description = "Zipper is a tiny app that can compress and extract zip files.";
 
-            app.HelpOption("-? | --help");
+            Action<CommandLineApplication> compressConfig = (a) => {
+                var inputDir = a.Option("-i | --input <directory>", "The input directory to be compressed. (optional) Defaults to current directory.", CommandOptionType.SingleValue);
+                var outputFile = a.Option("-o | --output <zipFile>", "The zip file to output. (required) Must not target input directory.", CommandOptionType.SingleValue);
+                a.HelpOption("-? | --help");
+                a.OnExecute(() => Compress(inputDir, outputFile));
+            };
 
-            app.OnExecute(() =>
+            Action<CommandLineApplication> extractConfig = (a) => {
+                var inputFile = a.Option("-i | --input <zipFile>", "The input file to be extracted. (required)", CommandOptionType.SingleValue);
+                var outputDir = a.Option("-o | --output <directory>", "The directory to output. (optional) Defaults to current directory.", CommandOptionType.SingleValue);
+                a.HelpOption("-? | --help");
+                a.OnExecute(() => Extract(inputFile, outputDir));
+            };
+
+            app.Syntax = "zipper compress -o ../myfile.zip";
+            app.Command("compress", compressConfig);
+            app.Command("extract", extractConfig);
+            
+            if (args.Length == 0 || (args.Length == 1 && args[0] == "-?") || (args.Length == 1 && args[0] == "--help"))
             {
-                if (outputFile.HasValue())
-                {
-                    var folder = inputPath.HasValue() ? Path.GetFullPath(inputPath.Value()) : Environment.CurrentDirectory;
-                    var success = Execute(folder, outputFile.Value());
-                    if (!success) return -1;
-                }
-                else
-                {
-                    app.ShowHelp();
-                }
-
-                return 0;
-            });
-
-            return app.Execute(args);
+                Console.WriteLine();
+                Console.WriteLine("Usage: zipper compress -o ../myFile.zip");
+                Console.WriteLine("       zipper extract -i myFile.zip");
+                Console.WriteLine();
+                Console.WriteLine("Help:  zipper compress --help");
+                Console.WriteLine("       zipper extract --help");
+                return -1;
+            }
+            
+            try
+            {
+                return app.Execute(args);
+            }
+            catch (CommandParsingException e)
+            {
+                Console.WriteLine(e.Message);
+                return -1;
+            }
         }
 
-        public static bool Execute(string inputPath, string outputFile)
+        private static int Compress(CommandOption inputDir, CommandOption outputFile)
         {
             try
             {
-                Console.WriteLine("Zipping {0} into {1}...", inputPath, outputFile);
-
-                if (!Directory.Exists(Path.GetDirectoryName(inputPath)))
-                    Directory.CreateDirectory(Path.GetDirectoryName(inputPath));
+                var inDir = inputDir.HasValue() ? Path.GetFullPath(inputDir.Value()) : Environment.CurrentDirectory;
                 
-                ZipFile.CreateFromDirectory(inputPath, outputFile, CompressionLevel.Optimal, false);                
+                if (!outputFile.HasValue()) throw new ArgumentException("The <zipFile> is missing.");
+                var outFile = Path.GetFullPath(outputFile.Value());
+                Console.WriteLine($"Compressing '{inDir}' into '{outFile}'");
+
+                if (!Directory.Exists(Path.GetDirectoryName(outFile)))
+                    Directory.CreateDirectory(Path.GetDirectoryName(outFile));
+                
+                ZipFile.CreateFromDirectory(inDir, outFile, CompressionLevel.Optimal, false);
             }
             catch (Exception e)
             {
-                // We have 2 log calls because we want a nice error message but we also want to capture the callstack in the log.
-                Console.WriteLine("An exception has occured while trying to zip '{0}' into '{1}'.", inputPath, outputFile);
-                Console.WriteLine(e.ToString());
-                return false;
+                Console.WriteLine(e.Message);
+                return -1;
             }
+            return 0;
+        }
 
-            return true;
+        private static int Extract(CommandOption inputFile, CommandOption outputDir)
+        {
+            try
+            {
+                if (!inputFile.HasValue()) throw new ArgumentException("The <zipFile> is missing.");
+                var inFile = Path.GetFullPath(inputFile.Value());
+                
+                var outDir = outputDir.HasValue() ? Path.GetFullPath(outputDir.Value()) : Environment.CurrentDirectory;
+
+                Console.WriteLine($"Extracting '{inFile}' to '{outDir}'");
+
+                if (!Directory.Exists(outDir))
+                    Directory.CreateDirectory(outDir);
+                
+                ZipFile.ExtractToDirectory(inFile, outDir, false);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return -1;
+            }
+            return 0;
         }
     }
 }

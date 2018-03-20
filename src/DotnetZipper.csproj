@@ -1,23 +1,26 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <AssemblyName>dotnet-zipper</AssemblyName>
+    <Version>1.0.1</Version>
+    <Description>Zipper is a tiny tool that can compress and extract zip files.</Description>
+    <Authors>JarrettV</Authors>
+
     <ToolCommandName>zipper</ToolCommandName>
     <PackAsTool>true</PackAsTool>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
     
-    <Description>Zipper is a .NET Core tool to zip a folder, typically for use after dotnet publish.</Description>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <Authors>JarrettV</Authors>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
-    <AssemblyName>dotnet-zipper</AssemblyName>
-    <OutputType>Exe</OutputType>
+
     <PackageId>Zipper</PackageId>
-    <PackageIconUrl>https://github.com/jarrettv/Zipper/blob/master/src/icon.png</PackageIconUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/jarrettv/Zipper/master/src/icon.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/jarrettv/Zipper/</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/jarrettv/Zipper/blob/master/LICENSE</PackageLicenseUrl>
+
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/jarrettv/Zipper/</RepositoryUrl>
+    
     <!-- Workaround only required for early previews of .NET Core tools. Can be removed when .NET Core 2.1 is released. -->
     <NETCorePlatformsImplicitPackageVersion>2.0.1</NETCorePlatformsImplicitPackageVersion>
   </PropertyGroup>

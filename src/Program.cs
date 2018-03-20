@@ -13,8 +13,6 @@ namespace IllumiCare.Platform.CommandLineUtils
         {
             var app = new CommandLineApplication(throwOnUnexpectedArg: true);
 
-            app.Description = "Zipper is a tiny app that can compress and extract zip files.";
-
             Action<CommandLineApplication> compressConfig = (a) => {
                 var inputDir = a.Option("-i | --input <directory>", "The input directory to be compressed. (optional) Defaults to current directory.", CommandOptionType.SingleValue);
                 var outputFile = a.Option("-o | --output <zipFile>", "The zip file to output. (required) Must not target input directory.", CommandOptionType.SingleValue);
